@@ -368,25 +368,31 @@ function VideoMosaicWall() {
             var cellAspect = (cellWidth / cellHeight).toFixed(2);
             var imageGridSize = utils.calculateImageGridSize(optimalGrid.rows, optimalGrid.cols);
             
-            var confirmMsg = "Layout Preview\n\n" +
-                "Videos: " + videoCount + "\n" +
-                "Grid: " + optimalGrid.cols + " x " + optimalGrid.rows + " (" + (optimalGrid.rows * optimalGrid.cols) + " cells)\n" +
-                "Cell size: " + Math.round(cellWidth) + "x" + Math.round(cellHeight) + " px\n" +
-                "Cell aspect ratio: " + cellAspect + ":1\n";
+            // Show confirmation dialog
+            var confirmDialog = new Window("dialog", "Layout Preview");
+            confirmDialog.add("statictext", undefined, "Videos: " + videoCount);
+            confirmDialog.add("statictext", undefined, "Grid: " + optimalGrid.cols + " x " + optimalGrid.rows + " (" + (optimalGrid.rows * optimalGrid.cols) + " cells)");
+            confirmDialog.add("statictext", undefined, "Cell size: " + Math.round(cellWidth) + "x" + Math.round(cellHeight) + " px");
+            confirmDialog.add("statictext", undefined, "Cell aspect ratio: " + cellAspect + ":1");
             
             if (hasImage) {
+                confirmDialog.add("statictext", undefined, ""); // spacer
                 if (imageGridSize > 0) {
-                    confirmMsg += "\nCenter Image: " + imageFile.name + "\n" +
-                        "Grid: " + imageGridSize + "x" + imageGridSize + " (" + (imageGridSize * imageGridSize) + " pieces)\n";
+                    confirmDialog.add("statictext", undefined, "Center Image: " + imageFile.name);
+                    confirmDialog.add("statictext", undefined, "Grid: " + imageGridSize + "x" + imageGridSize + " (" + (imageGridSize * imageGridSize) + " pieces)");
                 } else {
-                    confirmMsg += "\nWarning: Grid too small for image reveal.\n" +
-                        "Minimum 7x7 grid required. Image will be skipped.\n";
+                    var warnText = confirmDialog.add("statictext", undefined, "Warning: Grid too small for image reveal.");
+                    confirmDialog.add("statictext", undefined, "Minimum 7x7 grid required. Image will be skipped.");
                 }
             }
             
-            confirmMsg += "\nProceed?";
+            var buttonGroup = confirmDialog.add("group");
+            buttonGroup.orientation = "row";
+            buttonGroup.alignment = "right";
+            var noBtn = buttonGroup.add("button", undefined, "No", {name: "cancel"});
+            var yesBtn = buttonGroup.add("button", undefined, "Yes", {name: "ok"});
             
-            if (!confirm(confirmMsg)) {
+            if (confirmDialog.show() !== 1) {
                 throw new Error("User cancelled");
             }
             
@@ -608,17 +614,16 @@ function VideoMosaicWall() {
                         // Piece comp is CELL_WIDTH x CELL_HEIGHT (a small window)
                         // We need to position the big image so the right section shows through
                         
-                        // For 5x5: center is at (2, 2)
-                        var centerIndex = 2;
+                        // Calculate center index based on actual grid size
+                        var centerIndex = Math.floor(CENTER_IMAGE_SIZE / 2);
                         
                         // How far this piece is from the center
-                        var colOffset = pieceCol - centerIndex; // -2 to +2
-                        var rowOffset = pieceRow - centerIndex; // -2 to +2
+                        var colOffset = pieceCol - centerIndex;
+                        var rowOffset = pieceRow - centerIndex;
                         
                         // Position the image
-                        // Center piece (2,2): image center at comp center
-                        // Top-left (0,0): image needs to shift RIGHT and DOWN by 2 cells
-                        // Bottom-right (4,4): image needs to shift LEFT and UP by 2 cells
+                        // Center piece: image center at comp center
+                        // Other pieces: offset accordingly
                         var finalX = (pieceComp.width / 2) - (colOffset * CELL_WIDTH);
                         var finalY = (pieceComp.height / 2) - (rowOffset * CELL_HEIGHT);
                         
@@ -627,7 +632,7 @@ function VideoMosaicWall() {
                         // Add piece to main comp
                         var pieceLayer = mainComp.layers.add(pieceComp);
                         
-                        // Position in grid (center 5x5)
+                        // Position in grid (center area)
                         var gridRow = CENTER_START_ROW + pieceRow;
                         var gridCol = CENTER_START_COL + pieceCol;
                         var xPos = (gridCol + 0.5) * CELL_WIDTH;
