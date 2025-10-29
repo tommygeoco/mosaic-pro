@@ -109,11 +109,12 @@ function VideoMosaicWall() {
         function getInfoText(orientation) {
             var dims = orientation === "landscape" ? "3840x2160" : "2160x3840";
             var aspectName = orientation === "landscape" ? "Landscape (16:9)" : "Portrait (9:16)";
-            return aspectName + " - " + dims + " @ 30fps\n\n" +
-                "Grid calculated automatically from video count.\n" +
-                "Always creates balanced grid with center cell.\n\n" +
-                "Optional: Add one image file (.jpg/.png) to folder\n" +
-                "for center reveal effect.";
+            return aspectName + "\n" +
+                dims + " @ 30fps\n\n" +
+                "Grid auto-calculated from video count\n" +
+                "Balanced layout with perfect center\n\n" +
+                "Image Feature:\n" +
+                "Add .jpg/.png to folder for center reveal";
         }
         
         var infoText = infoPanel.add("statictext", undefined, getInfoText(self.orientation), {multiline: true});
