@@ -1,17 +1,19 @@
 /*
  * MosaicPro v1.0.0
- * Professional Video Mosaic Wall Creator for After Effects
+ * After Effects Video Mosaic Creator
  * 
- * Automatically creates stunning video mosaic compositions with:
- * - Intelligent grid calculation for any video count
- * - 4K landscape or portrait orientation support
- * - Optional staggered reveal effects
- * - Optional center image/logo reveal
- * - Transparent backgrounds for easy compositing
+ * Author: Tommy Geoco
+ * Website: https://designertom.io
+ * Tools: https://uxtools.co
  * 
- * Perfect for social media content, video walls, and motion graphics
+ * Features:
+ * - Automatic grid calculation for any video count
+ * - 4K landscape or portrait output
+ * - Optional staggered reveal effect
+ * - Optional center image reveal
+ * - Transparent backgrounds for compositing
  * 
- * © 2025 - Created for motion designers
+ * License: MIT
  */
 
 // Frame rate constant
@@ -28,26 +30,32 @@ function VideoMosaicWall() {
     this.scriptVersion = "1.0.0";
     
     // UI strings
-    this.aboutText = this.scriptName + " v" + this.scriptVersion + "\n\n" +
-        "Professional video mosaic wall creator for After Effects.\n\n" +
-        "KEY FEATURES:\n" +
-        "• Intelligent Grid - Automatically calculates optimal layout\n" +
-        "• Any Video Count - Works with your footage library\n" +
-        "• Dual Orientation - 4K Landscape or Portrait output\n" +
-        "• Perfect Center - Always creates balanced grids\n" +
-        "• Looping Videos - Seamless playback for any duration\n" +
-        "• Staggered Reveal - Dynamic disappearing effect\n" +
-        "• Center Image - Optional logo/image reveal feature\n" +
-        "• Export Ready - Transparent backgrounds for compositing\n\n" +
-        "HOW TO USE:\n" +
-        "1. Import videos into a folder in your Project panel\n" +
-        "2. Optionally add one image (.jpg/.png) for center reveal\n" +
-        "3. Select the folder in your Project panel\n" +
-        "4. Choose orientation and duration settings\n" +
-        "5. Click 'Create Mosaic Wall'\n\n" +
-        "TIP: Works best with odd×odd counts (9, 15, 21, 25, 35, 45, 49, 63, 77, 81, 99, 105, 121...)\n" +
-        "Script will guide you if adjustments are needed.\n\n" +
-        "Created for motion designers by motion designers.";
+    this.aboutText = this.scriptName + " v" + this.scriptVersion + "\n" +
+        "After Effects Video Mosaic Creator\n\n" +
+        "FEATURES\n" +
+        "- Automatic grid calculation\n" +
+        "- 4K landscape (3840x2160) or portrait (2160x3840)\n" +
+        "- Looping video playback\n" +
+        "- Optional staggered reveal effect\n" +
+        "- Optional center image/logo reveal\n" +
+        "- Transparent backgrounds\n\n" +
+        "USAGE\n" +
+        "1. Import videos into a Project folder\n" +
+        "2. Optionally add one .jpg or .png image\n" +
+        "3. Select the folder\n" +
+        "4. Choose settings\n" +
+        "5. Click Create Mosaic\n\n" +
+        "IMAGE FEATURE\n" +
+        "Add one image file to your folder. It will be automatically:\n" +
+        "- Detected and validated\n" +
+        "- Scaled to fit center area\n" +
+        "- Split into grid pieces (3x3, 5x5, or 7x7)\n" +
+        "- Revealed randomly during playback\n\n" +
+        "REQUIREMENTS\n" +
+        "Video count must allow odd x odd grid (9, 15, 21, 25, 35, 45, 49, 63, 77, 81, 99, 105, 121...)\n" +
+        "Script will suggest adjustments if needed.\n\n" +
+        "Author: Tommy Geoco\n" +
+        "Website: designertom.io | uxtools.co";
     
     // Error messages
     this.noFolderError = "Please select a folder in the Project panel.";
@@ -80,8 +88,11 @@ function VideoMosaicWall() {
         orientationPanel.alignChildren = ["left", "top"];
         
         var orientGroup = orientationPanel.add("group{orientation:'row'}");
-        var landscapeRadio = orientGroup.add("radiobutton", undefined, "Landscape (16:9) - 3840x2160");
-        var portraitRadio = orientGroup.add("radiobutton", undefined, "Portrait (9:16) - 2160x3840");
+        var landscapeRadio = orientGroup.add("radiobutton", undefined, "Landscape (16:9)");
+        var portraitRadio = orientGroup.add("radiobutton", undefined, "Portrait (9:16)");
+        
+        landscapeRadio.helpTip = "3840x2160 - Horizontal format";
+        portraitRadio.helpTip = "2160x3840 - Vertical format";
         
         if (self.orientation === "landscape") {
             landscapeRadio.value = true;
@@ -96,61 +107,51 @@ function VideoMosaicWall() {
         
         // Function to update info text based on orientation
         function getInfoText(orientation) {
-            var dims = orientation === "landscape" ? "3840×2160" : "2160×3840";
+            var dims = orientation === "landscape" ? "3840x2160" : "2160x3840";
             var aspectName = orientation === "landscape" ? "Landscape (16:9)" : "Portrait (9:16)";
-            return aspectName + "\n" +
-                dims + " @ 30fps\n\n" +
-                "✓ Intelligent grid auto-calculation\n" +
-                "✓ Perfect center alignment\n" +
-                "✓ Looping videos\n" +
-                "✓ Optional staggered reveal effect\n" +
-                "✓ Optional center image reveal\n" +
-                "✓ Transparent backgrounds\n\n" +
-                "Select a folder with videos to begin.";
+            return aspectName + " - " + dims + " @ 30fps\n\n" +
+                "Grid calculated automatically from video count.\n" +
+                "Always creates balanced grid with center cell.\n\n" +
+                "Optional: Add one image file (.jpg/.png) to folder\n" +
+                "for center reveal effect.";
         }
         
         var infoText = infoPanel.add("statictext", undefined, getInfoText(self.orientation), {multiline: true});
         
-        // Duration Settings panel
-        var durationPanel = mainGroup.add("panel", undefined, "Duration Settings");
-        durationPanel.alignment = ["fill", "top"];
-        durationPanel.alignChildren = ["left", "top"];
+        // Settings panel
+        var settingsPanel = mainGroup.add("panel", undefined, "Settings");
+        settingsPanel.alignment = ["fill", "top"];
+        settingsPanel.alignChildren = ["left", "top"];
         
-        var baseDurationGroup = durationPanel.add("group{orientation:'row'}");
+        var baseDurationGroup = settingsPanel.add("group{orientation:'row'}");
         baseDurationGroup.add("statictext", undefined, "Duration (seconds):");
         var baseDurationInput = baseDurationGroup.add("edittext", undefined, self.baseDuration);
         baseDurationInput.characters = 8;
+        baseDurationInput.helpTip = "How long the mosaic plays";
         
-        var durationInfoText = durationPanel.add("statictext", undefined, 
-            "How long your mosaic plays", 
-            {multiline: true});
-        durationInfoText.graphics.font = ScriptUI.newFont(durationInfoText.graphics.font.name, "ITALIC", 10);
-        
-        // Reveal Effect Settings panel
+        // Reveal Effect panel
         var revealPanel = mainGroup.add("panel", undefined, "Reveal Effect (Optional)");
         revealPanel.alignment = ["fill", "top"];
         revealPanel.alignChildren = ["left", "top"];
         
         var enableRevealGroup = revealPanel.add("group{orientation:'row'}");
-        var enableRevealCheckbox = enableRevealGroup.add("checkbox", undefined, "Enable Reveal Effect");
+        var enableRevealCheckbox = enableRevealGroup.add("checkbox", undefined, "Enable");
         enableRevealCheckbox.value = self.enableStaggeredReveal;
+        enableRevealCheckbox.helpTip = "Videos disappear randomly to reveal layers beneath";
         
         var fadeOutGroup = revealPanel.add("group{orientation:'row'}");
-        fadeOutGroup.add("statictext", undefined, "Transition Speed (frames):");
+        fadeOutGroup.add("statictext", undefined, "Speed (frames):");
         var fadeOutInput = fadeOutGroup.add("edittext", undefined, self.fadeOutDuration);
         fadeOutInput.characters = 8;
         fadeOutInput.enabled = self.enableStaggeredReveal;
+        fadeOutInput.helpTip = "Transition speed for each video";
         
         var effectGroup = revealPanel.add("group{orientation:'row'}");
-        effectGroup.add("statictext", undefined, "Effect Window (seconds):");
+        effectGroup.add("statictext", undefined, "Window (seconds):");
         var effectInput = effectGroup.add("edittext", undefined, self.effectDuration);
         effectInput.characters = 8;
         effectInput.enabled = self.enableStaggeredReveal;
-        
-        var revealInfoText = revealPanel.add("statictext", undefined, 
-            "Videos disappear randomly to reveal\nlayers beneath. Center cell exits last.", 
-            {multiline: true});
-        revealInfoText.graphics.font = ScriptUI.newFont(revealInfoText.graphics.font.name, "ITALIC", 10);
+        effectInput.helpTip = "Time window for reveal effect";
         
         // Progress group
         var progressGroup = mainGroup.add("group{orientation:'column',alignment:['fill','center']}");
@@ -189,28 +190,31 @@ function VideoMosaicWall() {
         
         baseDurationInput.onChange = function() {
             var val = parseFloat(this.text);
-            if (!isNaN(val) && val > 0) {
+            if (!isNaN(val) && val >= 1 && val <= 3600) {
                 self.baseDuration = val;
             } else {
                 this.text = self.baseDuration;
+                alert("Duration must be between 1 and 3600 seconds.", "Invalid Input");
             }
         };
         
         fadeOutInput.onChange = function() {
             var val = parseInt(this.text);
-            if (!isNaN(val) && val > 0) {
+            if (!isNaN(val) && val >= 1 && val <= 120) {
                 self.fadeOutDuration = val;
             } else {
                 this.text = self.fadeOutDuration;
+                alert("Speed must be between 1 and 120 frames.", "Invalid Input");
             }
         };
         
         effectInput.onChange = function() {
             var val = parseFloat(this.text);
-            if (!isNaN(val) && val > 0) {
+            if (!isNaN(val) && val >= 1 && val <= 60) {
                 self.effectDuration = val;
             } else {
                 this.text = self.effectDuration;
+                alert("Window must be between 1 and 60 seconds.", "Invalid Input");
             }
         };
         
@@ -294,6 +298,17 @@ function VideoMosaicWall() {
             var imageFile = this.getImageFile(sourceFolder);
             var hasImage = (imageFile !== null);
             
+            // Validate image if present
+            if (hasImage) {
+                if (imageFile.width < 500 || imageFile.height < 500) {
+                    var proceed = confirm("Warning: Image is small (" + imageFile.width + "x" + imageFile.height + ").\n\n" +
+                        "Recommended minimum: 500x500 pixels for best quality.\n\nProceed anyway?");
+                    if (!proceed) {
+                        hasImage = false;
+                    }
+                }
+            }
+            
             // Get video files only
             var footageItems = this.getFootageItems(sourceFolder);
             
@@ -312,32 +327,31 @@ function VideoMosaicWall() {
             var optimalGrid = utils.calculateOptimalGrid(videoCount, baseCompWidth, baseCompHeight);
             
             if (optimalGrid === null) {
-                // No perfect odd×odd grid exists
+                // No perfect odd x odd grid exists
                 var nearestGrids = utils.findNearestOddGrids(videoCount);
-                var suggestions = "\n\n💡 SUGGESTIONS:";
+                var suggestions = "\n\nSuggestions:";
                 
                 if (nearestGrids.below) {
                     var removeCount = videoCount - nearestGrids.below.count;
                     var bestBelow = utils.calculateOptimalGrid(nearestGrids.below.count, baseCompWidth, baseCompHeight);
-                    suggestions += "\n\n✓ Remove " + removeCount + " video" + (removeCount > 1 ? "s" : "") + 
-                        " → " + nearestGrids.below.count + " total";
+                    suggestions += "\n- Remove " + removeCount + " video" + (removeCount > 1 ? "s" : "") + 
+                        " (use " + nearestGrids.below.count + " total)";
                     if (bestBelow) {
-                        suggestions += "\n   Grid: " + bestBelow.cols + "×" + bestBelow.rows;
+                        suggestions += " → " + bestBelow.cols + "x" + bestBelow.rows + " grid";
                     }
                 }
                 if (nearestGrids.above) {
                     var addCount = nearestGrids.above.count - videoCount;
                     var bestAbove = utils.calculateOptimalGrid(nearestGrids.above.count, baseCompWidth, baseCompHeight);
-                    suggestions += "\n\n✓ Add " + addCount + " video" + (addCount > 1 ? "s" : "") + 
-                        " → " + nearestGrids.above.count + " total";
+                    suggestions += "\n- Add " + addCount + " video" + (addCount > 1 ? "s" : "") + 
+                        " (use " + nearestGrids.above.count + " total)";
                     if (bestAbove) {
-                        suggestions += "\n   Grid: " + bestAbove.cols + "×" + bestAbove.rows;
+                        suggestions += " → " + bestAbove.cols + "x" + bestAbove.rows + " grid";
                     }
                 }
                 
-                throw new Error("⚠️ Cannot Create Perfect Grid\n\n" +
-                    "Your folder has " + videoCount + " videos.\n\n" +
-                    "MosaicPro requires an odd×odd grid for perfect center alignment." + suggestions);
+                throw new Error("Cannot create grid with " + videoCount + " videos.\n\n" +
+                    "Requires odd x odd grid for center alignment." + suggestions);
             }
             
             // Show calculated grid info and confirm
@@ -346,23 +360,23 @@ function VideoMosaicWall() {
             var cellAspect = (cellWidth / cellHeight).toFixed(2);
             var imageGridSize = utils.calculateImageGridSize(optimalGrid.rows, optimalGrid.cols);
             
-            var confirmMsg = "MosaicPro - Layout Preview\n\n" +
-                "📹 Videos: " + videoCount + "\n" +
-                "📐 Grid: " + optimalGrid.cols + " × " + optimalGrid.rows + " (" + (optimalGrid.rows * optimalGrid.cols) + " cells)\n" +
-                "📏 Cell size: " + Math.round(cellWidth) + "×" + Math.round(cellHeight) + "px\n" +
-                "⚖️  Cell ratio: " + cellAspect + ":1\n";
+            var confirmMsg = "Layout Preview\n\n" +
+                "Videos: " + videoCount + "\n" +
+                "Grid: " + optimalGrid.cols + " x " + optimalGrid.rows + " (" + (optimalGrid.rows * optimalGrid.cols) + " cells)\n" +
+                "Cell size: " + Math.round(cellWidth) + "x" + Math.round(cellHeight) + " px\n" +
+                "Cell aspect ratio: " + cellAspect + ":1\n";
             
             if (hasImage) {
                 if (imageGridSize > 0) {
-                    confirmMsg += "\n🖼️  Center Image: " + imageFile.name + "\n" +
-                        "   " + imageGridSize + "×" + imageGridSize + " grid (" + (imageGridSize * imageGridSize) + " pieces)\n";
+                    confirmMsg += "\nCenter Image: " + imageFile.name + "\n" +
+                        "Grid: " + imageGridSize + "x" + imageGridSize + " (" + (imageGridSize * imageGridSize) + " pieces)\n";
                 } else {
-                    confirmMsg += "\n⚠️  Grid too small for image reveal (min 7×7 required)\n" +
-                        "   Image will be skipped\n";
+                    confirmMsg += "\nWarning: Grid too small for image reveal.\n" +
+                        "Minimum 7x7 grid required. Image will be skipped.\n";
                 }
             }
             
-            confirmMsg += "\n✨ Ready to create your mosaic?";
+            confirmMsg += "\nProceed?";
             
             if (!confirm(confirmMsg)) {
                 throw new Error("User cancelled");
@@ -645,32 +659,21 @@ function VideoMosaicWall() {
             
             // Show success message
             var orientInfo = this.orientation === "landscape" ? "Landscape" : "Portrait";
-            var successMsg = "✨ Mosaic Created Successfully!\n\n" +
-                  "📐 " + orientInfo + ": " + COMP_WIDTH + "×" + COMP_HEIGHT + "\n" +
-                  "🎬 Grid: " + COLS + "×" + ROWS + " (" + videoIndex + " videos)\n" +
-                  "⏱️  Duration: " + compDuration.toFixed(1) + " seconds\n" +
-                  "📁 " + mainComp.name + "\n";
+            var successMsg = "Mosaic created successfully.\n\n" +
+                  "Composition: " + mainComp.name + "\n" +
+                  "Orientation: " + orientInfo + " (" + COMP_WIDTH + "x" + COMP_HEIGHT + ")\n" +
+                  "Grid: " + COLS + "x" + ROWS + " (" + videoIndex + " videos)\n" +
+                  "Duration: " + compDuration.toFixed(1) + " seconds";
             
             if (this.enableStaggeredReveal) {
-                successMsg += "\nReveal Effect:\n" +
-                    "✓ Videos loop: " + this.baseDuration + " seconds\n" +
-                    "✓ Reveal window: " + this.effectDuration + " seconds\n" +
-                    "✓ Cells disappear randomly (center exits last)";
-            } else {
-                successMsg += "\n✓ Videos loop continuously: " + this.baseDuration + " seconds";
+                successMsg += "\n\nReveal Effect: Enabled\n" +
+                    "Loop: " + this.baseDuration + "s | Window: " + this.effectDuration + "s";
             }
             
             if (hasImage && CENTER_IMAGE_SIZE > 0) {
-                var lastVideoTime = this.enableStaggeredReveal ? 
-                    (this.baseDuration + this.effectDuration) : this.baseDuration;
-                var imageRevealStart = lastVideoTime - 3;
-                var imageRevealEnd = imageRevealStart + IMAGE_REVEAL_DURATION;
                 var totalPieces = CENTER_IMAGE_SIZE * CENTER_IMAGE_SIZE;
-                successMsg += "\n\nCenter Image:\n" +
-                    "✓ " + imageFile.name + "\n" +
-                    "✓ Split into " + totalPieces + " pieces (" + CENTER_IMAGE_SIZE + "×" + CENTER_IMAGE_SIZE + " grid)\n" +
-                    "✓ Reveals from " + imageRevealStart + "s to " + imageRevealEnd + "s\n" +
-                    "✓ Pieces appear randomly";
+                successMsg += "\n\nCenter Image: " + imageFile.name + "\n" +
+                    "Split into " + totalPieces + " pieces (" + CENTER_IMAGE_SIZE + "x" + CENTER_IMAGE_SIZE + " grid)";
             }
             
             alert(successMsg, this.scriptName);
