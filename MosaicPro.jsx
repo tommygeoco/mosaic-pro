@@ -107,14 +107,10 @@ function VideoMosaicWall() {
         
         // Function to update info text based on orientation
         function getInfoText(orientation) {
-            var dims = orientation === "landscape" ? "3840x2160" : "2160x3840";
-            var aspectName = orientation === "landscape" ? "Landscape (16:9)" : "Portrait (9:16)";
-            return aspectName + "\n" +
-                dims + " @ 30fps\n\n" +
-                "Grid auto-calculated from video count\n" +
-                "Balanced layout with perfect center\n\n" +
+            return "Grid auto-calculated from video count.\n" +
+                "Balanced layout with perfect center cell.\n\n" +
                 "Image Feature:\n" +
-                "Add .jpg/.png to folder for center reveal";
+                "Add .jpg/.png to folder for center reveal.";
         }
         
         var infoText = infoPanel.add("statictext", undefined, getInfoText(self.orientation), {multiline: true});
@@ -124,11 +120,14 @@ function VideoMosaicWall() {
         settingsPanel.alignment = ["fill", "top"];
         settingsPanel.alignChildren = ["left", "top"];
         
-        var baseDurationGroup = settingsPanel.add("group{orientation:'row'}");
-        baseDurationGroup.add("statictext", undefined, "Duration (seconds):");
-        var baseDurationInput = baseDurationGroup.add("edittext", undefined, self.baseDuration);
+        var baseDurationGroup = settingsPanel.add("group{orientation:'column',alignChildren:['left','top']}");
+        var durationLabelGroup = baseDurationGroup.add("group{orientation:'row'}");
+        durationLabelGroup.add("statictext", undefined, "Duration (seconds):");
+        var baseDurationInput = durationLabelGroup.add("edittext", undefined, self.baseDuration);
         baseDurationInput.characters = 8;
-        baseDurationInput.helpTip = "How long the mosaic plays";
+        var durationDesc = baseDurationGroup.add("statictext", undefined, "How long videos play before reveal begins");
+        durationDesc.graphics.font = ScriptUI.newFont(durationDesc.graphics.font.name, ScriptUI.FontStyle.ITALIC, 9);
+        durationDesc.graphics.foregroundColor = durationDesc.graphics.newPen(durationDesc.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
         
         // Reveal Effect panel
         var revealPanel = mainGroup.add("panel", undefined, "Reveal Effect (Optional)");
@@ -140,19 +139,25 @@ function VideoMosaicWall() {
         enableRevealCheckbox.value = self.enableStaggeredReveal;
         enableRevealCheckbox.helpTip = "Videos disappear randomly to reveal layers beneath";
         
-        var fadeOutGroup = revealPanel.add("group{orientation:'row'}");
-        fadeOutGroup.add("statictext", undefined, "Speed (frames):");
-        var fadeOutInput = fadeOutGroup.add("edittext", undefined, self.fadeOutDuration);
+        var fadeOutGroup = revealPanel.add("group{orientation:'column',alignChildren:['left','top']}");
+        var speedLabelGroup = fadeOutGroup.add("group{orientation:'row'}");
+        speedLabelGroup.add("statictext", undefined, "Speed (frames):");
+        var fadeOutInput = speedLabelGroup.add("edittext", undefined, self.fadeOutDuration);
         fadeOutInput.characters = 8;
         fadeOutInput.enabled = self.enableStaggeredReveal;
-        fadeOutInput.helpTip = "Transition speed for each video";
+        var speedDesc = fadeOutGroup.add("statictext", undefined, "Transition speed for each cell");
+        speedDesc.graphics.font = ScriptUI.newFont(speedDesc.graphics.font.name, ScriptUI.FontStyle.ITALIC, 9);
+        speedDesc.enabled = self.enableStaggeredReveal;
         
-        var effectGroup = revealPanel.add("group{orientation:'row'}");
-        effectGroup.add("statictext", undefined, "Window (seconds):");
-        var effectInput = effectGroup.add("edittext", undefined, self.effectDuration);
+        var effectGroup = revealPanel.add("group{orientation:'column',alignChildren:['left','top']}");
+        var windowLabelGroup = effectGroup.add("group{orientation:'row'}");
+        windowLabelGroup.add("statictext", undefined, "Window (seconds):");
+        var effectInput = windowLabelGroup.add("edittext", undefined, self.effectDuration);
         effectInput.characters = 8;
         effectInput.enabled = self.enableStaggeredReveal;
-        effectInput.helpTip = "Time window for reveal effect";
+        var windowDesc = effectGroup.add("statictext", undefined, "Total time for all cells to disappear");
+        windowDesc.graphics.font = ScriptUI.newFont(windowDesc.graphics.font.name, ScriptUI.FontStyle.ITALIC, 9);
+        windowDesc.enabled = self.enableStaggeredReveal;
         
         // Progress group
         var progressGroup = mainGroup.add("group{orientation:'column',alignment:['fill','center']}");
@@ -187,6 +192,8 @@ function VideoMosaicWall() {
             self.enableStaggeredReveal = this.value;
             fadeOutInput.enabled = this.value;
             effectInput.enabled = this.value;
+            speedDesc.enabled = this.value;
+            windowDesc.enabled = this.value;
         };
         
         baseDurationInput.onChange = function() {
