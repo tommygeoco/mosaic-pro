@@ -1,0 +1,7 @@
+# After Effects files
+*.aep
+Adobe After Effects Auto-Save/
+
+# Project-specific files
+WEBSITE_COPY.md
+MosaicPro.jsx
